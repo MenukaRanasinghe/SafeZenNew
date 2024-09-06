@@ -5,10 +5,9 @@ import { useState } from 'react';
 import { GrHomeRounded } from 'react-icons/gr';
 import { LiaUserSolid } from 'react-icons/lia';
 import { IoDocumentsOutline } from 'react-icons/io5';
-import { FiMenu } from 'react-icons/fi';
-import {FiSettings} from 'react-icons/fi'
-import Image from 'next/image';
+import { FiMenu, FiSettings } from 'react-icons/fi';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useSession } from 'next-auth/react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,8 +17,8 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar, onTabChange }: SidebarProps) => {
   const [selected, setSelected] = useState<string>('Overview');
-
-  const userRole = 'Admin';
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || 'Guest';
 
   const menuItems = {
     Admin: [
@@ -55,7 +54,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onTabChange }: SidebarProps) => {
         <div className="p-10 flex items-center space-x-4">
         </div>
         <div className="flex-1">
-          {menuItems[userRole].map((item) => (
+          {menuItems[userRole]?.map((item) => (
             <Link href={item.path} key={item.label}>
               <div
                 className={`flex items-center p-4 space-x-4 cursor-pointer rounded-sm ${
@@ -82,7 +81,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onTabChange }: SidebarProps) => {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <span>Jane Smith</span>
+            <span>Hello</span>
           </div>
         </div>
       </div>
