@@ -13,14 +13,18 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [credentials?.email]) as [RowDataPacket[], FieldPacket[]];
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
+        }
+
+        const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [credentials.email]) as [RowDataPacket[], FieldPacket[]];
         
         if (rows.length === 0) {
           throw new Error('No user found with this email');
         }
 
         const user = rows[0];
-        const isValid = await bcrypt.compare(credentials?.password ?? '', user.password);
+        const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (isValid) {
           return { id: user.id, email: user.email, role: user.role };
@@ -32,11 +36,21 @@ export const authOptions = {
   ],
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error', 
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      if (url.startsWith(baseUrl)) {
-        return url;
+    async redirect({ url, baseUrl, token }) {
+      if (token?.role) {
+        switch (token.role) {
+          case 'admin':
+            return `${baseUrl}/admin/dashboard`;
+          case 'leader':
+            return `${baseUrl}/leader/dashboard`;
+          case 'member':
+            return `${baseUrl}/member/dashboard`;
+          default:
+            return baseUrl;
+        }
       }
       return baseUrl;
     },

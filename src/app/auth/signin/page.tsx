@@ -1,21 +1,33 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
+  const router = useRouter();
+
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
-    await signIn('credentials', {
-      email: form.email.value,
-      password: form.password.value,
-      redirect: false,
+    const email = form.email.value;
+    const password = form.password.value;
+
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false, 
     });
+
+    if (result?.error) {
+      console.error(result.error);
+    } else if (result?.ok) {
+      router.push(result.url || '/');
+    }
   };
 
   return (
-    <div className="flex min-h-screen bg-[#FBF5ED] items-center justify-center px-4">
-      <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden max-w-4xl w-full">
+    <div className="flex min-h-screen bg-[#ffffff] items-center justify-center px-4">
+      <div className="flex flex-col md:flex-row bg-[#868da7] shadow-lg overflow-hidden max-w-4xl w-full">
         <div className="w-full md:w-1/2 bg-black text-white p-6 md:p-10 flex flex-col items-center justify-center rounded-br-lg rounded-bl-lg md:rounded-br-lg md:rounded-tr-lg md:rounded-bl-none">
           <h1 className="text-3xl md:text-4xl leading-tight tracking-tight">
             <div>Safeguard</div>
@@ -25,7 +37,7 @@ export default function SignInPage() {
             <div>Ease.</div>
           </h1>
         </div>
-        <div className="w-full md:w-1/2 bg-[#FBF5ED] p-6 md:p-10">
+        <div className="w-full md:w-1/2 bg-[#f0f1f5] p-6 md:p-10">
           <h2 className="text-xl md:text-2xl font-semibold text-gray-800">Welcome to SafeZen!</h2>
           <p className="mt-2 text-gray-600 text-sm md:text-base">Enter your credentials to access your account.</p>
           <form onSubmit={handleSignIn} className="mt-8 space-y-6">
