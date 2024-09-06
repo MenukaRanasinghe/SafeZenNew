@@ -15,12 +15,13 @@ export default function SignInPage() {
     const result = await signIn('credentials', {
       email,
       password,
-      redirect: false, 
+      redirect: false,
     });
+    console.log('SignIn Result:', result);
 
     if (result?.error) {
       console.error(result.error);
-    } else if (result?.ok) {
+    } else if (result?.ok && result.url) {
       router.push(result.url || '/');
     }
   };

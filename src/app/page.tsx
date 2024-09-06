@@ -1,18 +1,28 @@
 'use client';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function HomePage() {
   const { data: session } = useSession();
+  const router = useRouter();
 
-  if (session) {
-    return (
-      <div>
-        <p>Welcome, {session.user?.name}</p>
-        <button onClick={() => signOut()}>Sign out</button>
-      </div>
-    );
-  } else {
+  useEffect(() => {
+    if (session) {
+      const redirectUrl = session.user?.role === 'Admin'
+        ? '/admin'
+        : session.user?.role === 'Leader'
+        ? '/leader'
+        : session.user?.role === 'Member'
+        ? '/member'
+        : '/';
+      
+      router.push(redirectUrl);
+    }
+  }, [session, router]);
+
+  if (!session) {
     return (
       <div>
         <p>You are not logged in</p>
@@ -20,4 +30,6 @@ export default function HomePage() {
       </div>
     );
   }
+
+  return null;
 }

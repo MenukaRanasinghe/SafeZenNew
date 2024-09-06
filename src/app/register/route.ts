@@ -7,10 +7,7 @@ export async function POST(req: NextRequest) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await pool.execute(
-    'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
-    [email, hashedPassword, role]
-  );
+  await pool.execute('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashedPassword, role]);
 
   return NextResponse.json({ message: 'User created successfully' });
 }
