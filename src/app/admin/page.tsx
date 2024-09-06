@@ -51,7 +51,7 @@ export default function AdminPage() {
   return (
     <DashboardLayout>
       <div className="p-6 space-y-4">
-        <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+        <h1 className="text-2xl font-semibold">Admin Dashboard</h1><br></br>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card title="Total Users" count={userCount} />
           <Card title="Total Tasks" count={taskCount} />
