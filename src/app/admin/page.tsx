@@ -32,11 +32,11 @@ export default function AdminPage() {
       fetchUserCount();
       const fetchTaskCount = async () => {
         try {
-          const response = await fetch('/api/user-count');
+          const response = await fetch('/api/tasks');
           const data = await response.json();
-          setTaskCount(data.userCount);
+          setTaskCount(data.taskCount);
         } catch (error) {
-          console.error('Failed to fetch user count', error);
+          console.error('Failed to fetch task count', error);
         }
       };
 
