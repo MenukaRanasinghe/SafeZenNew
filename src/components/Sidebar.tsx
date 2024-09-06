@@ -19,21 +19,22 @@ const Sidebar = ({ isOpen, toggleSidebar, onTabChange }: SidebarProps) => {
   const [selected, setSelected] = useState<string>('Overview');
   const { data: session } = useSession();
   const userRole = session?.user?.role || 'Guest';
+  const userEmail = session?.user?.email || 'Guest'; 
 
   const menuItems = {
     Admin: [
-      { label: 'Dashboard', icon: <GrHomeRounded />, path: '/dashboard' },
-      { label: 'Users', icon: <LiaUserSolid />, path: '/users' },
-      { label: 'Tasks', icon: <IoDocumentsOutline />, path: '/tasks' },
-      { label: 'Settings', icon: <FiSettings />, path: '/settings' },
+      { label: 'Dashboard', icon: <GrHomeRounded />, path: '/admin' },
+      { label: 'Users', icon: <LiaUserSolid />, path: '/admin/users' },
+      { label: 'Tasks', icon: <IoDocumentsOutline />, path: '/admin/tasks' },
+      { label: 'Settings', icon: <FiSettings />, path: '/admin/settings' },
     ],
     Leader: [
-      { label: 'Tasks', icon: <IoDocumentsOutline />, path: '/tasks' },
-      { label: 'Settings', icon: <FiSettings />, path: '/settings' },
+      { label: 'Tasks', icon: <IoDocumentsOutline />, path: '/leader' },
+      { label: 'Settings', icon: <FiSettings />, path: '/leader/settings' },
     ],
     Member: [
-      { label: 'My Tasks', icon: <IoDocumentsOutline />, path: '/my-tasks' },
-      { label: 'Settings', icon: <FiSettings />, path: '/settings' },
+      { label: 'My Tasks', icon: <IoDocumentsOutline />, path: '/member' },
+      { label: 'Settings', icon: <FiSettings />, path: '/member/settings' },
     ],
   };
 
@@ -81,7 +82,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onTabChange }: SidebarProps) => {
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <span>Hello</span>
+            <span>{userEmail}</span>
           </div>
         </div>
       </div>
