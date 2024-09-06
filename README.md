@@ -1,6 +1,8 @@
 
 ## SafeZen
 
+SafeZen is a secure task management system that allows efficient handling of tasks within a team.
+
 Features:
 
 - Admin: Create/manage users, oversee tasks.
