@@ -1,11 +1,9 @@
-// pages/leader-tasks.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
-import Modal from '@/components/Modal';
 import CreateTaskForm from '@/components/CreateTaskForm';
 import { Task } from '@/types';
 
@@ -14,8 +12,8 @@ export default function LeaderTasksPage() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
 
   useEffect(() => {
@@ -59,7 +57,7 @@ export default function LeaderTasksPage() {
     } catch (error) {
       console.error('Error creating task:', error);
     } finally {
-      setShowCreateModal(false);
+      setShowCreateForm(false);
     }
   };
 
@@ -79,7 +77,7 @@ export default function LeaderTasksPage() {
     } catch (error) {
       console.error('Error updating task:', error);
     } finally {
-      setShowEditModal(false);
+      setShowEditForm(false);
       setCurrentTask(null);
     }
   };
@@ -96,9 +94,9 @@ export default function LeaderTasksPage() {
     }
   };
 
-  const openEditModal = (task: Task) => {
+  const openEditForm = (task: Task) => {
     setCurrentTask(task);
-    setShowEditModal(true);
+    setShowEditForm(true);
   };
 
   if (status === 'loading' || loading) {
@@ -111,7 +109,7 @@ export default function LeaderTasksPage() {
         <h1 className="text-2xl font-semibold">Leader Dashboard</h1><br></br>
 
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => setShowCreateForm(true)}
           className="px-4 py-2 bg-[#3742fa] text-white rounded"
         >
           Create Task
@@ -139,17 +137,18 @@ export default function LeaderTasksPage() {
                     <td className="border px-4 py-2">{task.deadline}</td>
                     <td className="border px-4 py-2">{task.status}</td>
                     <td className="border px-4 py-2">
-                    <button
-                     onClick={() => openEditModal(task)}
-                     className="text-blue-500 hover:underline mr-4">
-                     Edit
-                     </button>
-                    <button
-                      onClick={() => handleDeleteTask(task.id)}
-                     className="text-red-500 hover:underline">
-                     Delete
-                    </button>
-
+                      <button
+                        onClick={() => openEditForm(task)}
+                        className="text-blue-500 hover:underline mr-4"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-red-500 hover:underline"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -162,16 +161,18 @@ export default function LeaderTasksPage() {
           </table>
         </div>
 
-        {showCreateModal && (
-          <Modal onClose={() => setShowCreateModal(false)} onSave={handleCreateTask} initialTask={{ id: 0, name: '', description: '', deadline: '', status: 'Not Assigned' }}>
-            <CreateTaskForm onSubmit={handleCreateTask} initialTask={{ id: 0, name: '', description: '', deadline: '', status: 'Not Assigned' }} />
-          </Modal>
+        {showCreateForm && (
+          <CreateTaskForm
+            onSubmit={handleCreateTask}
+            initialTask={{ id: 0, name: '', description: '', deadline: '', status: 'Not Assigned' }}
+          />
         )}
 
-        {showEditModal && currentTask && (
-          <Modal onClose={() => setShowEditModal(false)} onSave={handleEditTask} initialTask={currentTask}>
-            <CreateTaskForm onSubmit={handleEditTask} initialTask={currentTask} />
-          </Modal>
+        {showEditForm && currentTask && (
+          <CreateTaskForm
+            onSubmit={handleEditTask}
+            initialTask={currentTask}
+          />
         )}
       </div>
     </DashboardLayout>

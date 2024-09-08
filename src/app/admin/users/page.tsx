@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/DashboardLayout';
-import Modal from '@/components/Modal';
 import { User } from '@/types';
 import CreateUserForm from '@/components/CreateUserForm';
 
@@ -14,7 +13,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [userCount, setUserCount] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -83,7 +82,7 @@ export default function AdminUsersPage() {
       if (!res.ok) throw new Error('Failed to create user');
       const newUser = await res.json();
       setUsers([...users, newUser]);
-      setIsModalOpen(false);
+      setIsCreatingUser(false);
     } catch (error) {
       console.error('Error creating user:', error);
     }
@@ -98,12 +97,23 @@ export default function AdminUsersPage() {
       <div className="p-6 space-y-4">
         <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsCreatingUser(true)}
           className="bg-[#3742fa] text-white px-4 py-2 rounded"
         >
           Create User
         </button>
-        <div className="overflow-x-auto">
+        {isCreatingUser && (
+          <div className="mt-4 p-4 border rounded">
+            <CreateUserForm onSubmit={handleCreateUser} />
+            <button
+              onClick={() => setIsCreatingUser(false)}
+              className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+        <div className="overflow-x-auto mt-4">
           <table className="min-w-full text-left text-sm border-x-gray-400">
             <thead>
               <tr>
@@ -151,11 +161,6 @@ export default function AdminUsersPage() {
         <div className="mt-4">
           <p>Total Users: {userCount}</p>
         </div>
-        {isModalOpen && (
-          <Modal onClose={() => setIsModalOpen(false)}>
-            <CreateUserForm onSubmit={handleCreateUser} />
-          </Modal>
-        )}
       </div>
     </DashboardLayout>
   );

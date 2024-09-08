@@ -1,87 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface CreateTaskFormProps {
-  onSubmit: (task: Task) => void;
-  initialTask: Task;
+  onSubmit: (task: { name: string; description: string; deadline: string; status: string }) => void;
+  initialTask: { name: string; description: string; deadline: string; status: string };
 }
 
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  deadline: string;
-  status: string;
-}
-
-export default function CreateTaskForm({ onSubmit, initialTask }: CreateTaskFormProps) {
-  const [task, setTask] = useState<Task>(initialTask);
-
-  useEffect(() => {
-    setTask(initialTask);
-  }, [initialTask]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setTask(prevTask => ({ ...prevTask, [name]: value }));
-  };
+const CreateTaskForm: React.FC<CreateTaskFormProps> = ({ onSubmit, initialTask }) => {
+  const [name, setName] = useState(initialTask.name);
+  const [description, setDescription] = useState(initialTask.description);
+  const [deadline, setDeadline] = useState(initialTask.deadline);
+  const [status, setStatus] = useState(initialTask.status);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(task);
+    try {
+      onSubmit({ name, description, deadline, status });
+      setSuccess('Task created successfully');
+      setError('');
+      setName('');
+      setDescription('');
+      setDeadline('');
+      setStatus('Not Assigned');
+    } catch (error) {
+      setError('Error creating task');
+      setSuccess('');
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block">Task Name:</label>
+        <label className="block text-sm font-medium">Name</label>
         <input
           type="text"
-          id="name"
-          name="name"
-          value={task.name}
-          onChange={handleChange}
-          className="border rounded p-2 w-full"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
+          className="border px-2 py-1 rounded w-full"
         />
       </div>
       <div>
-        <label htmlFor="description" className="block">Description:</label>
-        <input
-          type="text"
-          id="description"
-          name="description"
-          value={task.description}
-          onChange={handleChange}
-          className="border rounded p-2 w-full"
+        <label className="block text-sm font-medium">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           required
+          className="border px-2 py-1 rounded w-full"
         />
       </div>
       <div>
-        <label htmlFor="deadline" className="block">Deadline:</label>
+        <label className="block text-sm font-medium">Deadline</label>
         <input
           type="date"
-          id="deadline"
-          name="deadline"
-          value={task.deadline}
-          onChange={handleChange}
-          className="border rounded p-2 w-full"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
           required
+          className="border px-2 py-1 rounded w-full"
         />
       </div>
       <div>
-        <label htmlFor="status" className="block">Status:</label>
+        <label className="block text-sm font-medium">Status</label>
         <select
-          id="status"
-          name="status"
-          value={task.status}
-          onChange={handleChange}
-          className="border rounded p-2 w-full"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="border px-2 py-1 rounded w-full"
         >
           <option value="Not Assigned">Not Assigned</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
         </select>
       </div>
+      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        Save Task
+      </button>
+      {success && <p className="text-green-500">{success}</p>}
+      {error && <p className="text-red-500">{error}</p>}
     </form>
   );
-}
+};
+
+export default CreateTaskForm;
