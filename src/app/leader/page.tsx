@@ -14,7 +14,10 @@ export default function LeaderTasksPage() {
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
+    const [showAssignDropdown, setShowAssignDropdown] = useState<number | null>(null);
     const [currentTask, setCurrentTask] = useState<Task | null>(null);
+    const [users, setUsers] = useState<any[]>([]);
+    const [selectedUser, setSelectedUser] = useState<number | null>(null);
 
     useEffect(() => {
         async function fetchTasks() {
@@ -30,7 +33,19 @@ export default function LeaderTasksPage() {
             }
         }
 
+        async function fetchUsers() {
+            try {
+                const res = await fetch('/api/users');
+                if (!res.ok) throw new Error('Failed to fetch users');
+                const data = await res.json();
+                setUsers(data.users || []);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
         fetchTasks();
+        fetchUsers();
     }, []);
 
     useEffect(() => {
@@ -43,29 +58,28 @@ export default function LeaderTasksPage() {
     }, [session, status, router]);
 
     const handleCreateTask = async (task: Task) => {
-      try {
-          const res = await fetch('/api/tasks', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(task),
-          });
-  
-          if (!res.ok) {
-              const error = await res.text();
-              throw new Error(`Failed to create task: ${error}`);
-          }
-  
-          const data = await res.json();
-          setTasks(prevTasks => [...prevTasks, data.task]);
-      } catch (error) {
-          console.error('Error creating task:', error);
-      } finally {
-          setShowCreateForm(false);
-      }
-  };
-  
+        try {
+            const res = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(task),
+            });
+
+            if (!res.ok) {
+                const error = await res.text();
+                throw new Error(`Failed to create task: ${error}`);
+            }
+
+            const data = await res.json();
+            setTasks(prevTasks => [...prevTasks, data.task]);
+        } catch (error) {
+            console.error('Error creating task:', error);
+        } finally {
+            setShowCreateForm(false);
+        }
+    };
 
     const handleEditTask = async (task: Task) => {
         try {
@@ -101,9 +115,40 @@ export default function LeaderTasksPage() {
         }
     };
 
-    const openEditForm = (task: Task) => {
+    const handleAssignTask = async () => {
+        if (currentTask && selectedUser) {
+            try {
+                const res = await fetch('/api/assign-task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        taskId: currentTask.id,
+                        userId: selectedUser,
+                    }),
+                });
+                if (!res.ok) {
+                    const error = await res.text();
+                    throw new Error(`Failed to assign task: ${error}`);
+                }
+                const data = await res.json();
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === currentTask.id ? { ...task, status: 'In Progress' } : task
+                    )
+                );
+                setShowAssignDropdown(null);
+                setSelectedUser(null);
+            } catch (error) {
+                console.error('Error assigning task:', error);
+            }
+        }
+    };
+
+    const openAssignDropdown = (task: Task) => {
         setCurrentTask(task);
-        setShowEditForm(true);
+        setShowAssignDropdown(task.id);
     };
 
     if (status === 'loading' || loading) {
@@ -146,7 +191,7 @@ export default function LeaderTasksPage() {
                                         <td className="border px-4 py-2">
                                             <button
                                                 onClick={() => openEditForm(task)}
-                                                className="text-blue-500"
+                                                className="text-blue-500 ml-4"
                                             >
                                                 Edit
                                             </button>
@@ -156,6 +201,37 @@ export default function LeaderTasksPage() {
                                             >
                                                 Delete
                                             </button>
+                                            {task.status === 'Not Assigned' ? (
+                                                <div className="relative inline-block">
+                                                    <button
+                                                        onClick={() => openAssignDropdown(task)}
+                                                        className="text-green-500 ml-4"
+                                                    >
+                                                        Assign
+                                                    </button>
+                                                    {showAssignDropdown === task.id && (
+                                                        <div className="absolute bg-white border rounded shadow-lg mt-2">
+                                                            <select
+                                                                onChange={(e) => setSelectedUser(Number(e.target.value))}
+                                                                className="block w-full p-2 border rounded"
+                                                            >
+                                                                <option value="">Select User</option>
+                                                                {users.map(user => (
+                                                                    <option key={user.id} value={user.id}>
+                                                                        {user.name}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            <button
+                                                                onClick={handleAssignTask}
+                                                                className="px-4 py-2 bg-[#3742fa] text-white rounded mt-2"
+                                                            >
+                                                                Assign
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : null}
                                         </td>
                                     </tr>
                                 ))

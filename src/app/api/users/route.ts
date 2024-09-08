@@ -15,6 +15,15 @@ export async function GET() {
     return NextResponse.json({ userCount: 0, users: [] });
   }
 }
+export async function GETMEMBER() {
+  try {
+      const [rows] = await pool.query('SELECT id, name FROM users WHERE role = "Member"');
+      return NextResponse.json({ users: rows });
+  } catch (error) {
+      console.error('Error fetching users:', error);
+      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+  }
+}
 
 export async function DELETE(request: Request) {
   try {

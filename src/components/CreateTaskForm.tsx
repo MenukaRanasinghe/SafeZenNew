@@ -54,8 +54,7 @@ const CreateTaskForm: React.FC<CreateTaskFormProps> = ({ onSubmit, task }) => {
                 onChange={e => setStatus(e.target.value)}
                 className="border px-4 py-2 w-full"
             >
-                <option value="">Select Status</option>
-                <option value="Not Started">Not Started</option>
+                <option value="Not Assigned">Not Assigned</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
             </select>
