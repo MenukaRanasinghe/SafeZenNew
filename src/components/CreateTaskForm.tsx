@@ -1,84 +1,69 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Task } from '@/types';
 
-interface CreateTaskFormProps {
-  onSubmit: (task: { name: string; description: string; deadline: string; status: string }) => void;
-  initialTask: { name: string; description: string; deadline: string; status: string };
-}
+type CreateTaskFormProps = {
+    onSubmit: (task: Task) => void;
+    task?: Task;
+};
 
-const CreateTaskForm: React.FC<CreateTaskFormProps> = ({ onSubmit, initialTask }) => {
-  const [name, setName] = useState(initialTask.name);
-  const [description, setDescription] = useState(initialTask.description);
-  const [deadline, setDeadline] = useState(initialTask.deadline);
-  const [status, setStatus] = useState(initialTask.status);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+const CreateTaskForm: React.FC<CreateTaskFormProps> = ({ onSubmit, task }) => {
+    const [name, setName] = useState(task?.name || '');
+    const [description, setDescription] = useState(task?.description || '');
+    const [deadline, setDeadline] = useState(task?.deadline || '');
+    const [status, setStatus] = useState(task?.status || '');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      onSubmit({ name, description, deadline, status });
-      setSuccess('Task created successfully');
-      setError('');
-      setName('');
-      setDescription('');
-      setDeadline('');
-      setStatus('Not Assigned');
-    } catch (error) {
-      setError('Error creating task');
-      setSuccess('');
-    }
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!name || !description || !deadline || !status) return;
+        onSubmit({ id: task?.id || 0, name, description, deadline, status });
+    };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium">Name</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="border px-2 py-1 rounded w-full"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium">Description</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          className="border px-2 py-1 rounded w-full"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium">Deadline</label>
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          required
-          className="border px-2 py-1 rounded w-full"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium">Status</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border px-2 py-1 rounded w-full"
-        >
-          <option value="Not Assigned">Not Assigned</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Completed">Completed</option>
-        </select>
-      </div>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Save Task
-      </button>
-      {success && <p className="text-green-500">{success}</p>}
-      {error && <p className="text-red-500">{error}</p>}
-    </form>
-  );
+    useEffect(() => {
+        if (task) {
+            setName(task.name);
+            setDescription(task.description);
+            setDeadline(task.deadline);
+            setStatus(task.status);
+        }
+    }, [task]);
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Task Name"
+                className="border px-4 py-2 w-full"
+            />
+            <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Description"
+                className="border px-4 py-2 w-full"
+            />
+            <input
+                type="date"
+                value={deadline}
+                onChange={e => setDeadline(e.target.value)}
+                placeholder="Deadline"
+                className="border px-4 py-2 w-full"
+            />
+            <select
+                value={status}
+                onChange={e => setStatus(e.target.value)}
+                className="border px-4 py-2 w-full"
+            >
+                <option value="">Select Status</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <button type="submit" className="px-4 py-2 bg-[#3742fa] text-white rounded">
+                {task ? 'Update Task' : 'Create Task'}
+            </button>
+        </form>
+    );
 };
 
 export default CreateTaskForm;

@@ -16,21 +16,31 @@ export async function GET() {
     }
   }
 
-export async function POST(request: Request) {
-  try {
-    const { name, description, deadline, status } = await request.json();
+  export async function POST(request: Request) {
+    try {
+        const { name, description, deadline, status } = await request.json();
 
-    if (!name || !description || !deadline || !status) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+        if (!name || !description || !deadline || !status) {
+            return NextResponse.json({ error: 'All fields (name, description, deadline, status) are required' }, { status: 400 });
+        }
+
+        console.log('Received task data:', { name, description, deadline, status });
+
+        const [result] = await pool.query(
+            'INSERT INTO tasks (name, description, deadline, status) VALUES (?, ?, ?, ?)',
+            [name, description, deadline, status]
+        );
+        console.log('Task insertion result:', result);
+
+        const newTask = { id: result.insertId, name, description, deadline, status };
+
+        return NextResponse.json({ task: newTask, message: 'Task created successfully' });
+    } catch (error) {
+        console.error('Error creating task:', error);
+        return NextResponse.json({ error: 'Failed to create task', details: error.message }, { status: 500 });
     }
-
-    await pool.query('INSERT INTO tasks (name, description, deadline, status) VALUES (?, ?, ?, ?)', [name, description, deadline, status]);
-    return NextResponse.json({ message: 'Task created successfully' });
-  } catch (error) {
-    console.error('Error creating task:', error);
-    return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
-  }
 }
+
 
 export async function DELETE(request: Request) {
   try {
@@ -54,8 +64,16 @@ export async function PATCH(request: Request) {
     const id = searchParams.get('id');
     const { name, description, deadline, status } = await request.json();
 
-    if (!id || (!name && !description && !deadline && !status)) {
-      return NextResponse.json({ error: 'Task ID and at least one field to update are required' }, { status: 400 });
+    console.log('PATCH Request - Task ID:', id, { name, description, deadline, status });
+
+    if (!id) {
+      console.log('Task ID is missing');
+      return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
+    }
+
+    if (!name && !description && !deadline && !status) {
+      console.log('No fields to update');
+      return NextResponse.json({ error: 'At least one field to update is required' }, { status: 400 });
     }
 
     const updates = [];
@@ -79,11 +97,27 @@ export async function PATCH(request: Request) {
     values.push(id);
 
     const updateQuery = `UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`;
-    await pool.query(updateQuery, values);
+    console.log('Executing SQL Query:', updateQuery);
+    console.log('With Values:', values);
 
-    return NextResponse.json({ message: 'Task updated successfully' });
+    const [result] = await pool.query(updateQuery, values);
+    console.log('Query Result:', result);
+
+    if (result.affectedRows === 0) {
+      console.log('No task found with the given ID');
+      return NextResponse.json({ error: 'No task found with the given ID' }, { status: 404 });
+    }
+
+    const [taskRows] = await pool.query('SELECT id, name, description, deadline, status FROM tasks WHERE id = ?', [id]);
+    const updatedTask = taskRows[0];
+    console.log('Updated Task:', updatedTask);
+
+    return NextResponse.json({ task: updatedTask, message: 'Task updated successfully' });
   } catch (error) {
     console.error('Error updating task:', error);
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
   }
 }
+
+
+
