@@ -9,17 +9,17 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
-      const redirectUrl = session.user?.role === 'Admin'
-        ? '/admin'
-        : session.user?.role === 'Leader'
-        ? '/leader'
-        : session.user?.role === 'Member'
-        ? '/member'
-        : '/';
+    // if (session) {
+    //   const redirectUrl = session.user?.role === 'Admin'
+    //     ? '/admin'
+    //     : session.user?.role === 'Leader'
+    //     ? '/leader'
+    //     : session.user?.role === 'Member'
+    //     ? '/member'
+    //     : '/';
       
-      router.push(redirectUrl);
-    }
+    //   router.push(redirectUrl);
+    // }
   }, [session, router]);
 
   if (!session) {
